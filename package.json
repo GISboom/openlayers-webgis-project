@@ -1,0 +1,28 @@
+{
+  "name": "openlayers-study",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.0.3",
+    "axios": "^1.19.0",
+    "element-plus": "^2.14.4",
+    "mitt": "^3.0.1",
+    "ol": "^10.9.0",
+    "shpjs": "^6.2.0",
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.10.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.8"
+  }
+}
