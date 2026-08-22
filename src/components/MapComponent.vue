@@ -7,6 +7,7 @@
     @clearIcon="clearIcon"
     @locateNowCity="searchCity"
   />
+  <ActionsMenu @changeBaseMap="changeBaseMap" />
   <div id="map"></div>
 </template>
 
@@ -37,11 +38,17 @@ import useMap from "../hooks/useMap";
 import useCity from "../hooks/useCity";
 import useDraw from "../hooks/useDraw";
 import useMarker from "../hooks/useMarker";
+import useBaseMap from "../hooks/useBaseMap";
 import getTiandituLayers from "../utils/mapLayer";
 import MapToolBar from "./MapToolBar.vue";
+import ActionsMenu from "./ActionsMenu.vue";
 
 let { initMap } = useMap(); //hooks
+
 let TDTlayers = getTiandituLayers(); //获取天地图图层
+let allBaseMap = [...TDTlayers.image, ...TDTlayers.vector]; //...表示展开数组
+let vectorLayer = TDTlayers.vector;
+let imageLayer = TDTlayers.image;
 
 let map = null;
 let view = null;
@@ -99,15 +106,22 @@ const clearIcon = () => {
   }
   iconSurvice.clearIcon();
 };
+
+//切换底图
+let baseMapService = null;
+const changeBaseMap = (type) => {
+  if (baseMapService) {
+    baseMapService.changeBaseMap(type);
+  }
+};
+
 onMounted(() => {
-  // console.log(TDTlayers);//测试是否获取到图层
+  // console.log(TDTlayers); //测试是否获取到图层
   // 创建地图
-  const mapInfo = initMap("map", TDTlayers);
+  const mapInfo = initMap("map", allBaseMap);
 
   map = mapInfo.map;
   view = mapInfo.view;
-  //hooks
-  // initMap("map", TDTlayers);
 
   // 初始化城市服务
   cityService = useCity(map, view);
@@ -118,6 +132,10 @@ onMounted(() => {
 
   // 初始化图标服务
   iconSurvice = useMarker(map);
+
+  // 初始化底图服务
+  baseMapService = useBaseMap(TDTlayers);
+  baseMapService.initBaseMap("vector");
 });
 onUnmounted(() => {});
 </script>

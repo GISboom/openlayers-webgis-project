@@ -104,16 +104,16 @@
   };
   //切换底图
   const changesite = () => {
-    // layer1.setZIndex(10)
-    // layer2.setZIndex(11)
-    // layer3.setZIndex(50)
-    // layer4.setZIndex(51)
+    layer1.setZIndex(10)
+    layer2.setZIndex(11)
+    layer3.setZIndex(50)
+    layer4.setZIndex(51)
   };
   const changevector = () => {
-    // layer3.setZIndex(10)
-    // layer4.setZIndex(11)
-    // layer1.setZIndex(50)
-    // layer2.setZIndex(51)
+    layer3.setZIndex(10)
+    layer4.setZIndex(11)
+    layer1.setZIndex(50)
+    layer2.setZIndex(51)
   };
   //清除点要素
   let pointSource = null;

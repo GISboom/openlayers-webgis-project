@@ -114,7 +114,7 @@ onMounted(() => {
   //获取当前ip城市，加载矢量边界
   let { getNowCity } = useIPCity();
   getNowCity().then((res) => {
-    console.log(res);
+    // console.log(res);
 
     nowCity.value = res;
     emit("locateNowCity", res);
