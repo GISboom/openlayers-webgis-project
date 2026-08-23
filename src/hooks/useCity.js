@@ -43,7 +43,7 @@ export default function useCity(map, view) {
       }),
     });
     map.addLayer(citylayer);
-
+    
     //替代setTimeout，等geojson加载完成之后再做动画定位
     citySource.once("featuresloadend", () => {
       view.animate({
@@ -55,7 +55,7 @@ export default function useCity(map, view) {
 
     // 捕获geojson加载失败
     citySource.once("featuresloaderror", () => {
-      console.error("城市边界geojson加载失败 adcode:", adcodeVal);
+      console.error("城市边界geojson加载失败 adcode:", adcode);
     });
   };
 
@@ -81,6 +81,7 @@ export default function useCity(map, view) {
         name: district.name,
         adcode,
         center,
+        layer: citylayer,
       };
     } catch (error) {
       console.error("城市搜索失败", error);
@@ -89,5 +90,6 @@ export default function useCity(map, view) {
 
   return {
     searchCity,
+    
   };
 }

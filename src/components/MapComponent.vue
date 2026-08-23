@@ -8,11 +8,13 @@
     @locateNowCity="searchCity"
   />
   <ActionsMenu @changeBaseMap="changeBaseMap" />
+  <Popup />
+  <LayerPanel :manager="layerManager" />
   <div id="map"></div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, watch } from "vue";
 import { ref } from "vue";
 import "ol/ol.css";
 import Map from "ol/Map";
@@ -27,10 +29,6 @@ import { Feature } from "ol";
 import { Point, LineString } from "ol/geom";
 import Select from "ol/interaction/Select";
 import { defaults } from "ol/control/defaults";
-import ScaleLine from "ol/control/ScaleLine.js";
-import FullScreen from "ol/control/FullScreen.js";
-import OverviewMap from "ol/control/OverviewMap.js";
-import MousePosition from "ol/control/MousePosition.js";
 import Icon from "ol/style/Icon";
 import Text from "ol/style/Text";
 import axios from "axios";
@@ -39,8 +37,12 @@ import useCity from "../hooks/useCity";
 import useDraw from "../hooks/useDraw";
 import useMarker from "../hooks/useMarker";
 import useBaseMap from "../hooks/useBaseMap";
+import useMapSelect from "../hooks/useMapSelect";
+import useLayerManager from "../hooks/useLayerManager";
 import getTiandituLayers from "../utils/mapLayer";
 import MapToolBar from "./MapToolBar.vue";
+import Popup from "./Popup.vue";
+import LayerPanel from "./LayerPanel.vue";
 import ActionsMenu from "./ActionsMenu.vue";
 
 let { initMap } = useMap(); //hooks
@@ -55,11 +57,13 @@ let view = null;
 
 let activeTool = null; //当前激活的绘制
 
+let selectService = null;
+
 // 保存地图服务
 let cityService = null;
 // 提前声明
 // 工具栏调用的方法
-const searchCity = (keyword) => {
+const searchCity = async (keyword) => {
   if (cityService) {
     cityService.searchCity(keyword);
   }
@@ -115,6 +119,9 @@ const changeBaseMap = (type) => {
   }
 };
 
+//图层管理器
+let layerManager = null;
+
 onMounted(() => {
   // console.log(TDTlayers); //测试是否获取到图层
   // 创建地图
@@ -136,8 +143,25 @@ onMounted(() => {
   // 初始化底图服务
   baseMapService = useBaseMap(TDTlayers);
   baseMapService.initBaseMap("vector");
+
+  //创建全局Select
+  selectService = useMapSelect(map);
+  selectService.initSelect();
+
+  //图层管理器
+  layerManager = useLayerManager(map);
 });
-onUnmounted(() => {});
+onUnmounted(() => {
+  //销毁地图
+  if (selectService) {
+    selectService.destroy();
+  }
+
+  if (map) {
+    map.setTarget(null);
+    map = null;
+  }
+});
 </script>
 
 <style scoped>

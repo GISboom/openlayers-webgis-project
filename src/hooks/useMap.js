@@ -15,7 +15,7 @@ export default function useMap() {
       view: view,
       layers:layers,   
     })
-
+    
     return {
         map,
         view
