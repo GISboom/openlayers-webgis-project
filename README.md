@@ -23,6 +23,17 @@
 - 城市搜索
 
 
+## 项目结构
+
+hooks:
+地图逻辑封装
+
+components:
+页面组件
+
+config:
+业务配置
+
 ## 项目运行
 
 
@@ -37,8 +48,10 @@ npm run dev
 
 
 ## 项目截图
-
-![地图展示](./screenshots/map.png)
+<img width="1920" height="958" alt="ip城市" src="https://github.com/user-attachments/assets/488a4854-1e6d-4cc4-9f95-eba472032d40" />
+<img width="1920" height="958" alt="搜索城市" src="https://github.com/user-attachments/assets/c6a757a7-7386-479a-863f-3e240b4c7918" />
+<img width="1920" height="958" alt="draw" src="https://github.com/user-attachments/assets/575a2141-8241-45ee-8142-e481e1e0a695" />
+<img width="1920" height="958" alt="icon" src="https://github.com/user-attachments/assets/8c66930f-e519-45cf-b3ed-bed4366e9a8a" />
 
 
 ## 后续计划
