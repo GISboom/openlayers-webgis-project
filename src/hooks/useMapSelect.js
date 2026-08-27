@@ -1,6 +1,5 @@
 import Select from "ol/interaction/Select";
 import mapState from "../stores/mapState";
-import { Style, Stroke, Fill } from "ol/style";
 
 export default function useMapSelect(map, layer) {
   let select = null;
@@ -20,12 +19,17 @@ export default function useMapSelect(map, layer) {
   const handleSelect = (e) => {
     const feature = e.selected[0];
     if (feature) {
-      mapState.selectedInfo = feature.getProperties();
+      const properties = feature.getProperties();
+      delete properties.geometry;
+      mapState.selectedInfo = properties;
     } else {
       mapState.selectedInfo = null;
     }
   };
-
+  const clearSelection = () => {
+    select.getFeatures().clear();
+    mapState.selectedInfo = null;
+  };
   //销毁
   const destroy = () => {
     if (select) {
@@ -34,9 +38,21 @@ export default function useMapSelect(map, layer) {
       select = null;
     }
   };
+  // =========新增开关方法========
+  /** 禁用要素选择 */
+  const disable = () => {
+    select.setActive(false);
+    clearSelection(); // 同时清空已选中，关闭弹窗
+  };
+  /** 启用要素选择 */
+  const enable = () => {
+    select.setActive(true);
+  };
 
   return {
     initSelect,
     destroy,
+    enable,
+    disable,
   };
 }

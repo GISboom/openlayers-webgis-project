@@ -53,7 +53,8 @@ export default function useDraw(map) {
     map.addInteraction(drawInstance);
     // 绘制完成回调（双击结束一条线时触发）
     drawInstance.on("drawend", (e) => {
-      console.log(e.feature.getGeometry().getCoordinates());
+      // console.log(e.feature.getGeometry().getCoordinates());
+      
     });
   };
 

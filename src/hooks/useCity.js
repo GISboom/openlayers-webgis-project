@@ -3,7 +3,12 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { Style, Fill, Stroke } from "ol/style";
+/*
+8.23 13:32
+添加了图层管理功能
+需要改动这里的代码
 
+*/
 export default function useCity(map, view) {
   let citySource = null;
   let citylayer = null;
@@ -20,11 +25,6 @@ export default function useCity(map, view) {
 
   // 根据城市名称获取城市边界
   const renderCityBoundary = (adcode, center) => {
-    // 关键：先移除旧图层，避免重复叠加
-    if (citylayer) {
-      map.removeLayer(citylayer);
-      citylayer = null;
-    }
     //获取当前城市矢量范围
     citySource = new VectorSource({
       url: `https://geo.datav.aliyun.com/areas_v3/bound/${adcode}.json`,
@@ -42,7 +42,6 @@ export default function useCity(map, view) {
         }),
       }),
     });
-    map.addLayer(citylayer);
     
     //替代setTimeout，等geojson加载完成之后再做动画定位
     citySource.once("featuresloadend", () => {
@@ -57,6 +56,9 @@ export default function useCity(map, view) {
     citySource.once("featuresloaderror", () => {
       console.error("城市边界geojson加载失败 adcode:", adcode);
     });
+
+    //返回图层
+    return citylayer;
   };
 
   // 对外暴露的搜索方法
@@ -75,13 +77,12 @@ export default function useCity(map, view) {
 
       const center = [lng, lat];
       // 第三步：更新视图
-      renderCityBoundary(adcode, center);
-
+      const layer = renderCityBoundary(adcode, center);      
       return {
         name: district.name,
         adcode,
         center,
-        layer: citylayer,
+        layer,
       };
     } catch (error) {
       console.error("城市搜索失败", error);
@@ -90,6 +91,5 @@ export default function useCity(map, view) {
 
   return {
     searchCity,
-    
-  };
+      };
 }

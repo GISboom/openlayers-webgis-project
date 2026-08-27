@@ -1,16 +1,16 @@
 import layerState from "../stores/mapLayerState";
-
+import { markRaw } from "vue";
 export default function useLayerManager(map) {
   //添加图层
   const addLayer = (config) => {
-    console.log(config);
-    
+    // 如果存在同id，先删除
+    removeLayer(config.id);
     const { id, name, layer } = config;
     map.addLayer(layer);
     layerState.layers.push({
       id,
       name,
-      layer,
+      layer: markRaw(layer),//解决图层管理器中图层不可删除问题
       visible: true,
     });
   };

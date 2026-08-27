@@ -7,14 +7,19 @@
     @clearIcon="clearIcon"
     @locateNowCity="searchCity"
   />
-  <ActionsMenu @changeBaseMap="changeBaseMap" />
+  <ActionsMenu
+    @changeBaseMap="changeBaseMap"
+    @addGeoJson="addGeoJson"
+    @startMeasure="startMeasure"
+    @clearMeasure="clearMeasure"
+  />
   <Popup />
   <LayerPanel :manager="layerManager" />
   <div id="map"></div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch } from "vue";
+import { onMounted, onUnmounted, watch, shallowRef } from "vue";
 import { ref } from "vue";
 import "ol/ol.css";
 import Map from "ol/Map";
@@ -39,11 +44,14 @@ import useMarker from "../hooks/useMarker";
 import useBaseMap from "../hooks/useBaseMap";
 import useMapSelect from "../hooks/useMapSelect";
 import useLayerManager from "../hooks/useLayerManager";
+import useGeoJsonLayer from "../hooks/useGeoJsonLayer";
+import useMeasure from "../hooks/useMeasure";
 import getTiandituLayers from "../utils/mapLayer";
 import MapToolBar from "./MapToolBar.vue";
 import Popup from "./Popup.vue";
 import LayerPanel from "./LayerPanel.vue";
 import ActionsMenu from "./ActionsMenu.vue";
+import layerState from "../stores/mapLayerState";
 
 let { initMap } = useMap(); //hooks
 
@@ -61,11 +69,19 @@ let selectService = null;
 
 // 保存地图服务
 let cityService = null;
+
+//图层管理器
+const layerManager = shallowRef(null);
 // 提前声明
 // 工具栏调用的方法
 const searchCity = async (keyword) => {
   if (cityService) {
-    cityService.searchCity(keyword);
+    const result = await cityService.searchCity(keyword);
+    layerManager.value.addLayer({
+      id: "city",
+      name: result.name,
+      layer: result.layer,
+    });
   }
 };
 
@@ -79,6 +95,7 @@ const draw = (drawType) => {
     iconSurvice.stopIcon();
   }
   if (drawSurvice) {
+    selectService.disable();
     drawSurvice.startdraw(drawType);
   }
   activeTool = "draw";
@@ -98,6 +115,7 @@ const drawIcon = (icon) => {
     drawSurvice.stopDraw();
   }
   if (iconSurvice) {
+    selectService.disable();
     iconSurvice.drawIcon(icon);
   }
   activeTool = "icon";
@@ -119,9 +137,30 @@ const changeBaseMap = (type) => {
   }
 };
 
-//图层管理器
-let layerManager = null;
+//添加GeoJson
+let geoJsonService = null;
+const addGeoJson = async (file) => {
+  if (geoJsonService) {
+    const result = await geoJsonService.handleGeoJsonUpload(file);
+    layerManager.value.addLayer({
+      id: result.id,
+      name: result.name,
+      layer: result.layer,
+    });
+  }
+};
 
+let measureService = null;
+const startMeasure = (type) => {
+  if (measureService) {
+    measureService.startMeasure(type);
+  }
+};
+const clearMeasure = () => {
+  if (measureService) {
+    measureService.clearMeasure();
+  }
+};
 onMounted(() => {
   // console.log(TDTlayers); //测试是否获取到图层
   // 创建地图
@@ -149,8 +188,15 @@ onMounted(() => {
   selectService.initSelect();
 
   //图层管理器
-  layerManager = useLayerManager(map);
+  layerManager.value = useLayerManager(map);
+
+  //GeoJson图层
+  geoJsonService = useGeoJsonLayer(map);
+
+  //测量工具
+  measureService = useMeasure(map);
 });
+
 onUnmounted(() => {
   //销毁地图
   if (selectService) {

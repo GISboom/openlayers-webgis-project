@@ -6,36 +6,53 @@
       <span>
         {{ item.name }}
       </span>
-      <button @click="remove(item.id)">删除</button>
+      <el-button type="primary" plain @click="remove(item.id)">移除</el-button>
     </div>
   </div>
 </template>
 
 <script setup>
 import layerState from "../stores/mapLayerState";
-
 const layers = layerState.layers;
-const props = defineProps({
-  manager: Object,
-});
+const props = defineProps(["manager"]);
 
 const toggle = (id) => {
   props.manager.toggleLayer(id);
 };
 
 const remove = (id) => {
+  if (!props.manager) return;
   props.manager.removeLayer(id);
 };
 </script>
 <style scoped>
 .layer-panel {
   position: absolute;
-  top: 10%;
+  top: 20%;
   left: 10px;
-  width: 200px;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
   border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   z-index: 999;
+}
+h3{
+  margin-bottom: 10px;
+  padding: 0;
+  text-align: center;
+}
+.layer-item{
+  margin: 5px 0;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+input{
+  margin-right: 20px;
+}
+.el-button{
+  margin-left: 20px;
 }
 </style>
