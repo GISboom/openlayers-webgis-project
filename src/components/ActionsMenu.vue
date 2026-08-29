@@ -31,14 +31,48 @@
         清除测量
       </el-button>
     </div>
+    <div class="buffer">
+      <div class="distance">
+        <el-input
+          v-model="bufferDistance"
+          :precision="2"
+          placeholder="缓冲距离"
+        />
+        <span>米</span>
+      </div>
+      <el-button type="primary" plain @click="handlestartBufferDraw('Point')"
+        >点的缓冲区分析</el-button
+      >
+      <el-button
+        type="primary"
+        plain
+        @click="handlestartBufferDraw('LineString')"
+        >线的缓冲区分析</el-button
+      >
+      <el-button type="primary" plain @click="handlestopBufferDraw"
+        >结束绘制</el-button
+      >
+      <el-button type="primary" plain @click="handleexecuteBuffer">
+        执行缓冲
+      </el-button>
+      <el-button type="primary" plain @click="handleclearBufferDraw"
+        >清空buffer</el-button
+      >
+    </div>
   </div>
 </template>
 <script setup>
+import { ref } from "vue";
+let bufferDistance = ref(null);
 const emit = defineEmits([
   "changeBaseMap",
   "addGeoJson",
   "startMeasure",
   "clearMeasure",
+  "startBufferDraw",
+  "executeBuffer",
+  "stopBufferDraw",
+  "clearBufferDraw",
 ]);
 const handlechangeBaseMap = (type) => {
   emit("changeBaseMap", type);
@@ -52,6 +86,18 @@ const handlestartMeasure = (type) => {
 const handleclearMeasure = () => {
   emit("clearMeasure", "clear");
 };
+const handlestartBufferDraw = (type) => {
+  emit("startBufferDraw", type);
+};
+const handleexecuteBuffer = () => {
+  emit("executeBuffer", bufferDistance.value);
+};
+const handlestopBufferDraw = () => {
+  emit("stopBufferDraw");
+};
+const handleclearBufferDraw = () => {
+  emit("clearBufferDraw");
+}
 </script>
 <style scoped>
 .menu {
@@ -65,6 +111,7 @@ const handleclearMeasure = () => {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  overflow: scroll;
 }
 
 .changeBaseMap {
@@ -103,5 +150,28 @@ const handleclearMeasure = () => {
   margin: 0 auto;
   padding: 0;
   width: 60%;
+}
+.buffer {
+  width: 100%;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #22bdd5;
+  padding: 10px;
+  border-radius: 5px;
+}
+.buffer .el-button {
+  margin: 0 auto;
+  padding: 0;
+  width: 70%;
+}
+.buffer .distance {
+  margin: 0 auto;
+  padding: 0;
+}
+.buffer .distance .el-input {
+  margin-left: 13%;
+  width: 70%;
 }
 </style>

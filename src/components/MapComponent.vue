@@ -12,6 +12,10 @@
     @addGeoJson="addGeoJson"
     @startMeasure="startMeasure"
     @clearMeasure="clearMeasure"
+    @startBufferDraw="startBufferDraw"
+    @executeBuffer="executeBuffer"
+    @stopBufferDraw="stopBufferDraw"
+    @clearBufferDraw="clearBufferDraw"
   />
   <Popup />
   <LayerPanel :manager="layerManager" />
@@ -46,6 +50,7 @@ import useMapSelect from "../hooks/useMapSelect";
 import useLayerManager from "../hooks/useLayerManager";
 import useGeoJsonLayer from "../hooks/useGeoJsonLayer";
 import useMeasure from "../hooks/useMeasure";
+import useBuffer from "../hooks/useBuffer";
 import getTiandituLayers from "../utils/mapLayer";
 import MapToolBar from "./MapToolBar.vue";
 import Popup from "./Popup.vue";
@@ -161,6 +166,38 @@ const clearMeasure = () => {
     measureService.clearMeasure();
   }
 };
+
+//缓冲区分析
+let bufferService = null;
+const startBufferDraw = (type) => {
+  //关闭普通绘制和图标绘制
+  if (iconSurvice) {
+    iconSurvice.stopIcon();
+  }
+  if (drawSurvice) {
+    drawSurvice.stopDraw();
+  }
+  if (bufferService) {
+    selectService.disable();
+    bufferService.startBufferDraw(type);
+  }
+};
+const executeBuffer = (distance) => {
+  if (bufferService) {
+    bufferService.doBuffer(distance);
+  }
+};
+const stopBufferDraw = () => {
+  if (bufferService) {
+    bufferService.stopBufferDraw();
+  }
+};
+const clearBufferDraw = () => {
+  if (bufferService) {
+    bufferService.stopBufferDraw();
+    bufferService.clearBufferDraw();
+  }
+};
 onMounted(() => {
   // console.log(TDTlayers); //测试是否获取到图层
   // 创建地图
@@ -195,6 +232,9 @@ onMounted(() => {
 
   //测量工具
   measureService = useMeasure(map);
+
+  //缓冲区分析
+  bufferService = useBuffer(map);
 });
 
 onUnmounted(() => {
