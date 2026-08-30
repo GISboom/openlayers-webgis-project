@@ -71,11 +71,16 @@ export default function useDraw(map) {
     if (!drawSource) return;
     drawSource.clear();
   };
+  //对外提供一个获取 Feature 的方法。
+  const getDrawFeatures = () => {
+  return drawSource.getFeatures();
+};
   // 初始化
   initDrawLayer();
   return {
     startdraw,
     stopDraw,
     clearDraw,
+    getDrawFeatures,
   };
 }

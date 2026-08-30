@@ -12,10 +12,10 @@
     @addGeoJson="addGeoJson"
     @startMeasure="startMeasure"
     @clearMeasure="clearMeasure"
-    @startBufferDraw="startBufferDraw"
     @executeBuffer="executeBuffer"
-    @stopBufferDraw="stopBufferDraw"
     @clearBufferDraw="clearBufferDraw"
+    @doIntersection="doIntersection"
+    @clearIntersection="clearIntersection"
   />
   <Popup />
   <LayerPanel :manager="layerManager" />
@@ -51,6 +51,7 @@ import useLayerManager from "../hooks/useLayerManager";
 import useGeoJsonLayer from "../hooks/useGeoJsonLayer";
 import useMeasure from "../hooks/useMeasure";
 import useBuffer from "../hooks/useBuffer";
+import useIntersection from "../hooks/useIntersection";
 import getTiandituLayers from "../utils/mapLayer";
 import MapToolBar from "./MapToolBar.vue";
 import Popup from "./Popup.vue";
@@ -74,7 +75,7 @@ let selectService = null;
 
 // 保存地图服务
 let cityService = null;
-
+let currentCityLayer = null; //用于存储当前城市图层
 //图层管理器
 const layerManager = shallowRef(null);
 // 提前声明
@@ -87,6 +88,7 @@ const searchCity = async (keyword) => {
       name: result.name,
       layer: result.layer,
     });
+    currentCityLayer = result.layer;
   }
 };
 
@@ -169,33 +171,62 @@ const clearMeasure = () => {
 
 //缓冲区分析
 let bufferService = null;
-const startBufferDraw = (type) => {
-  //关闭普通绘制和图标绘制
-  if (iconSurvice) {
-    iconSurvice.stopIcon();
-  }
-  if (drawSurvice) {
-    drawSurvice.stopDraw();
-  }
+// const startBufferDraw = (type) => {
+//   //关闭普通绘制和图标绘制
+//   if (iconSurvice) {
+//     iconSurvice.stopIcon();
+//   }
+//   if (drawSurvice) {
+//     drawSurvice.stopDraw();
+//   }
+//   if (bufferService) {
+//     selectService.disable();
+//     bufferService.startBufferDraw(type);
+//   }
+// };
+const executeBuffer = async (distance) => {
   if (bufferService) {
-    selectService.disable();
-    bufferService.startBufferDraw(type);
+    const result = await bufferService.doBuffer(distance);
+
+    layerManager.value.addLayer({
+      id: result.id,
+      name: result.name,
+      layer: result.layer,
+    });
   }
 };
-const executeBuffer = (distance) => {
-  if (bufferService) {
-    bufferService.doBuffer(distance);
-  }
-};
-const stopBufferDraw = () => {
-  if (bufferService) {
-    bufferService.stopBufferDraw();
-  }
-};
+// const stopBufferDraw = () => {
+//   if (bufferService) {
+//     bufferService.stopBufferDraw();
+//   }
+// };
 const clearBufferDraw = () => {
   if (bufferService) {
     bufferService.stopBufferDraw();
     bufferService.clearBufferDraw();
+  }
+};
+
+//相交分析
+let intersectionService = null;
+const doIntersection = async () => {
+  if (intersectionService) {
+    if (!currentCityLayer) {
+      console.log("没有城市图层", currentCityLayer);
+      return;
+    }
+    const result = await intersectionService.doIntersection(currentCityLayer);
+
+    layerManager.value.addLayer({
+      id: result.id,
+      name: result.name,
+      layer: result.layer,
+    });
+  }
+};
+const clearIntersection = () => {
+  if (intersectionService) {
+    intersectionService.clearIntersection();
   }
 };
 onMounted(() => {
@@ -234,7 +265,11 @@ onMounted(() => {
   measureService = useMeasure(map);
 
   //缓冲区分析
-  bufferService = useBuffer(map);
+  //第二个参数是获取useDraw中绘制的所有要素
+  bufferService = useBuffer(map, drawSurvice.getDrawFeatures);
+
+  //相交分析
+  intersectionService = useIntersection(map, drawSurvice.getDrawFeatures);
 });
 
 onUnmounted(() => {

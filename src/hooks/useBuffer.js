@@ -7,7 +7,7 @@ import { ref } from "vue";
 import axios from "axios";
 
 //缓冲区分析
-export default function useBuffer(map) {
+export default function useBuffer(map, getDrawFeatures) {
   let drawInstance = null;
   const source = new VectorSource();
   const layer = new VectorLayer({
@@ -29,20 +29,20 @@ export default function useBuffer(map) {
     }),
   });
   map.addLayer(layer);
-      const bufferSource = new VectorSource();
-      const bufferLayer = new VectorLayer({
-        source:bufferSource,
-        style: new Style({
-          stroke: new Stroke({
-            color: "#ff0000",
-            width: 3,
-          }),
-          fill: new Fill({
-            color: "rgba(255,0,0,0.2)",
-          }),
-        }),
-      });
-      map.addLayer(bufferLayer);
+  const bufferSource = new VectorSource();
+  const bufferLayer = new VectorLayer({
+    source: bufferSource,
+    style: new Style({
+      stroke: new Stroke({
+        color: "#ff0000",
+        width: 3,
+      }),
+      fill: new Fill({
+        color: "rgba(255,0,0,0.2)",
+      }),
+    }),
+  });
+  // map.addLayer(bufferLayer);
   // 当前绘制出来的 GeoJSON
   let bufferGeometry = null;
   // 是否已经完成绘制
@@ -87,21 +87,40 @@ export default function useBuffer(map) {
   };
 
   const doBuffer = async (bufferDistance) => {
-    if (!bufferGeometry) {
-      console.log("没有缓冲区分析对象,请先绘制");
-      return;
-    }
+    // if (!bufferGeometry) {
+    //   console.log("没有缓冲区分析对象,请先绘制");
+    //   return;
+    // }
     if (bufferDistance === null || bufferDistance <= 0) {
       bufferDistance;
       console.log("请输入有效的缓冲距离");
       return;
     }
-    // 3. 构造请求数据,buffergeometry,缓冲区分析用到的几何对象包括geometry和distance
+    // // 3. 构造请求数据,buffergeometry,缓冲区分析用到的几何对象包括geometry和distance
+    // const data = {
+    //   geometry: bufferGeometry,
+    //   distance: Number(bufferDistance),
+    // };
+    /**
+     * 多要素buffer
+     *
+     */
+    //从useDraw中得到绘制的所有要素
+    const features = getDrawFeatures();
+
+    if (features.length === 0) {
+      console.log("没有缓冲区分析对象，请先绘制");
+      return;
+    }
+    //GeoJSON构建featureCollection
+    const geojsonFormat = new GeoJSON();
+    const featureCollection = geojsonFormat.writeFeaturesObject(features);
     const data = {
-      geometry: bufferGeometry,
+      geometry: featureCollection,
       distance: Number(bufferDistance),
     };
-    //  console.log("发送给后端：", JSON.stringify(data));
+    // console.log("geojson:",data);
+
     try {
       const response = await axios.post(
         "http://localhost:8089/api/analysis/buffer",
@@ -115,11 +134,15 @@ export default function useBuffer(map) {
         dataProjection: "EPSG:4326",
         featureProjection: "EPSG:4326",
       });
-      // bufferSource.clear();
       bufferSource.addFeature(feature);
     } catch (error) {
       console.error("请求失败:", error);
     }
+    return {
+      id: `buffer_${bufferDistance}`,
+      name: `缓冲区分析_${bufferDistance}`,
+      layer: bufferLayer,
+    };
   };
 
   const clearBufferDraw = () => {

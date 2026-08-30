@@ -40,24 +40,17 @@
         />
         <span>米</span>
       </div>
-      <el-button type="primary" plain @click="handlestartBufferDraw('Point')"
-        >点的缓冲区分析</el-button
-      >
-      <el-button
-        type="primary"
-        plain
-        @click="handlestartBufferDraw('LineString')"
-        >线的缓冲区分析</el-button
-      >
-      <el-button type="primary" plain @click="handlestopBufferDraw"
-        >结束绘制</el-button
-      >
+
       <el-button type="primary" plain @click="handleexecuteBuffer">
         执行缓冲
       </el-button>
       <el-button type="primary" plain @click="handleclearBufferDraw"
         >清空buffer</el-button
       >
+    </div>
+    <div class="intersection">
+      <el-button type="primary" plain @click="handleIntersection">相交分析</el-button>
+      <el-button type="primary" plain @click="handleClearIntersection">清除相交图层</el-button>
     </div>
   </div>
 </template>
@@ -69,10 +62,10 @@ const emit = defineEmits([
   "addGeoJson",
   "startMeasure",
   "clearMeasure",
-  "startBufferDraw",
   "executeBuffer",
-  "stopBufferDraw",
   "clearBufferDraw",
+  "doIntersection",
+  "clearIntersection",
 ]);
 const handlechangeBaseMap = (type) => {
   emit("changeBaseMap", type);
@@ -86,18 +79,18 @@ const handlestartMeasure = (type) => {
 const handleclearMeasure = () => {
   emit("clearMeasure", "clear");
 };
-const handlestartBufferDraw = (type) => {
-  emit("startBufferDraw", type);
-};
 const handleexecuteBuffer = () => {
   emit("executeBuffer", bufferDistance.value);
 };
-const handlestopBufferDraw = () => {
-  emit("stopBufferDraw");
-};
 const handleclearBufferDraw = () => {
   emit("clearBufferDraw");
-}
+};
+const handleIntersection = () => {
+  emit("doIntersection");
+};
+const handleClearIntersection = () => {
+  emit("clearIntersection");
+};
 </script>
 <style scoped>
 .menu {
@@ -172,6 +165,21 @@ const handleclearBufferDraw = () => {
 }
 .buffer .distance .el-input {
   margin-left: 13%;
+  width: 70%;
+}
+.intersection {
+  width: 100%;
+  margin: 20px auto;
+  background-color: #22bdd5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+.intersection .el-button {
+  margin: 0 auto;
+  padding: 0;
   width: 70%;
 }
 </style>
